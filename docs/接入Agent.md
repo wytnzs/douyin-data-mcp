@@ -47,7 +47,7 @@ node scripts/mcp-config.mjs
 
 | | |
 |---|---|
-| **Node.js 22+** | 唯一需要装的东西。到 nodejs.org 下 LTS 版 |
+| **Node.js 22+** | 唯一需要装的东西。到 nodejs.org 下 LTS 版，**Windows 和 Mac 的安装包是分开的**，Mac 还要认芯片（M 系列 ARM64 / 老 Intel 机 x64）|
 | **Chrome 或 Edge** | 一般都有 |
 | **支持 MCP 的 Agent** | Claude Code / WorkBuddy / Codex / Cursor / Cline… |
 | **抖音号 + 创作者中心权限** | 数据来源 |
