@@ -84,6 +84,9 @@ async function main() {
   // 3. 出总览
   await run("report.mjs");
 
+  // 3.5 出带日期的导出副本（给人交付/存档用；主表名字不变）
+  await run("export.mjs");
+
   // 4. 记日志
   const date = fs
     .readdirSync(RAW)

@@ -12,31 +12,29 @@
 import fs from "node:fs";
 import path from "node:path";
 import { DATA_DIR, RAW, CSV } from "./paths.mjs";
-
-
-const COLUMNS = [
-  "capture_date", "aweme_id", "title", "publish_date", "duration_sec",
-  "view", "like", "comment", "share", "collect",
-  "completion_rate_pct", "completion_rate_5s_pct", "bounce_rate_2s_pct",
-  "avg_view_sec", "fan_gain", "metrics_asof",
-  "media_type",
-];
-
-/** UTF-8 BOM。写给 Excel 认编码用，见 writeTable 的注释。 */
-// ---- CSV 读写统一走 csv.mjs（BOM 的读剥写在那一处）--------------------
+import { KEYS, toKey, toLabel } from "./columns.mjs";
 import { parseCsv, stringifyCsv, toObjects } from "./csv.mjs";
 
+// ---- CSV 读写：内部用英文 key，只在读写文件这一道边界上换中文表头 --------
 function readTable() {
-  if (!fs.existsSync(CSV)) return { header: COLUMNS.slice(), rows: [] };
-  let { header, rows } = parseCsv(fs.readFileSync(CSV, "utf8"));
-  if (!header.length) return { header: COLUMNS.slice(), rows: [] };
-  // 新增列只加在最后
-  for (const c of COLUMNS) if (!header.includes(c)) header.push(c);
-  return { header, rows: toObjects(header, rows) };
+  if (!fs.existsSync(CSV)) return { header: KEYS.slice(), rows: [] };
+  const parsed = parseCsv(fs.readFileSync(CSV, "utf8"));
+  if (!parsed.header.length) return { header: KEYS.slice(), rows: [] };
+  // 表头可能是中文（新文件）也可能是英文（老文件），统一认成内部 key，
+  // 老文件下一次写出时就自动升级成中文表头了，不用手工改。
+  const header = parsed.header.map(toKey);
+  for (const c of KEYS) if (!header.includes(c)) header.push(c);   // 新增列只加在最后
+  return { header, rows: toObjects(header, parsed.rows) };
 }
 
 function writeTable(header, rows) {
-  fs.writeFileSync(CSV, stringifyCsv(header, rows), "utf8");
+  const labels = header.map(toLabel);
+  const out = rows.map((o) => {
+    const n = {};
+    header.forEach((k) => { n[toLabel(k)] = o[k]; });
+    return n;
+  });
+  fs.writeFileSync(CSV, stringifyCsv(labels, out), "utf8");
 }
 
 

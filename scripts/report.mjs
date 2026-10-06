@@ -6,6 +6,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { DATA_DIR, RAW, CSV, OVERVIEW as OUT } from "./paths.mjs";
 import { parseCsv, toObjects } from "./csv.mjs";
+import { toKey } from "./columns.mjs";
 
 
 function pick(arg) {
@@ -23,7 +24,7 @@ const date = meta.capture_date;
 const acct = (meta.account || {}).nickname || "（账号昵称未取到）";
 
 const parsed = parseCsv(fs.readFileSync(CSV, "utf8"));
-const rows = toObjects(parsed.header, parsed.rows);
+const rows = toObjects(parsed.header.map(toKey), parsed.rows);  // 中文表头也认，认成内部 key
 const dates = [...new Set(rows.map((r) => r.capture_date))].sort();
 const prevDate = dates.filter((d) => d < date).pop() || null;
 

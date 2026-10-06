@@ -110,6 +110,14 @@ async function main() {
   }
   log(`→ 页面：${current.url}`);
 
+  // 浏览器刚被拉起来时，页面还在加载、后台接口也没就绪，
+  // 这时去取数会拿到一次空列表。等它稳一下再开始。
+  if (b.started) {
+    log("→ 浏览器是刚启动的，等它就绪…");
+    await waitForLoad(PORT, current.id, 30000);
+    await sleep(4000);
+  }
+
   // ---- 3. 登录 --------------------------------------------------------
   let status = await checkLogin();
   if (!String(status).startsWith("OK:")) {

@@ -80,6 +80,7 @@
     // ---- 1. 作品清单（分页）---------------------------------------------
     const awemes = [];
     let cursor = 0;
+    let emptyFirstPage = 0;
     for (let page = 0; page < MAX_PAGES; page++) {
       const text = await req(
         "/janus/douyin/creator/pc/work_list?status=0&count=" + PAGE_SIZE +
@@ -90,6 +91,17 @@
       if (j.status_code === 8) return fail("未登录：登录态已失效，请重新扫码后重跑。");
       if (j.status_code !== 0) return fail(`work_list 返回异常：status_code=${j.status_code} ${j.status_msg || ""}`);
       const list = j.aweme_list || j.items || [];
+
+      // 浏览器刚被拉起来的时候，后台偶尔会先回一次空列表。
+      // 那不是登录失效，是还没就绪 —— 等一会儿重试，别急着判死刑。
+      if (page === 0 && !list.length && emptyFirstPage < 6) {
+        emptyFirstPage++;
+        STATUS.note = `第一页暂时是空的，等后台就绪（第 ${emptyFirstPage} 次）`;
+        await sleep(2500);
+        page--;
+        continue;
+      }
+
       awemes.push.apply(awemes, list);
       STATUS.done = awemes.length;
       if (!j.has_more || !list.length) break;

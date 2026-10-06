@@ -156,9 +156,11 @@ function openFolder() {
   out();
   out("  已打开：" + target);
   out();
-  out("  想看数据就看这两个文件：");
+  out("  想看数据就看这两个：");
   out("    抖音数据总览.md   日常看这个（账号近 7 天 + 最近 15 条作品）");
-  out("    抖音作品数据.csv  完整历史，可以用 Excel 打开");
+  out("    抖音作品数据.csv  完整历史，双击用 Excel/WPS 打开");
+  out("  ");
+  out("  要发给别人或者存档，用「导出」文件夹里那份带日期的副本。");
 }
 
 async function changeDataDir(ask) {

@@ -67,6 +67,9 @@ export const CSV = path.join(DATA_DIR, "抖音作品数据.csv");
 export const OVERVIEW = path.join(DATA_DIR, "抖音数据总览.md");
 export const LOG = path.join(DATA_DIR, "抓取状态.md");
 
+/** 带日期的导出副本放这儿（主表名字不变，这是给人交付/存档用的那份） */
+export const EXPORT_DIR = path.join(DATA_DIR, "导出");
+
 export const COLLECT_JS = path.join(CODE_ROOT, "collect.js");
 export const SCRIPTS_DIR = path.join(CODE_ROOT, "scripts");
 

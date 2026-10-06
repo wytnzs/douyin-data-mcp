@@ -15,6 +15,7 @@ import { DATA_DIR, RAW, CSV, LOG, SCRIPTS_DIR } from "./paths.mjs";
 import { browserReady, PORT, PROFILE_DIR } from "./browser.mjs";
 import { listPages, evaluate } from "./cdp.mjs";
 import { parseCsv, toObjects } from "./csv.mjs";
+import { toKey } from "./columns.mjs";
 
 const SITE = "creator.douyin.com";
 const MANAGE_URL = `https://${SITE}/creator-micro/content/manage`;
@@ -89,7 +90,8 @@ async function envState() {
 function readCsv() {
   if (!fs.existsSync(CSV)) return { header: [], rows: [] };
   const { header, rows } = parseCsv(fs.readFileSync(CSV, "utf8"));
-  return { header, rows: toObjects(header, rows) };
+  const keys = header.map(toKey);   // 中文表头也认，认成内部 key
+  return { header: keys, rows: toObjects(keys, rows) };
 }
 
 function dataState() {
