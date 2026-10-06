@@ -113,6 +113,7 @@ function drawMenu(env) {
   out("  2  检查环境         看看缺什么、该怎么补");
   out("  3  打开数据文件夹   看看抓到了什么");
   out("  4  改数据保存位置   想放 D 盘或别处就按这个");
+  out("  5  接给 Agent 用     让 AI 帮你抓，一句话的事");
   out();
   out("  0  退出");
   out();
@@ -303,12 +304,19 @@ async function main() {
       continue;
     }
 
+    if (ans === "5") {
+      clear();
+      runNode("install-mcp.mjs");
+      await ask(NL + "  按回车回到菜单…");
+      continue;
+    }
+
     if (ans === "") continue;   // 空回车就重画菜单，不算输错
 
     clear();
     out();
     out("  没看懂这个输入：" + JSON.stringify(ans));
-    out("  请输入 1、2、3、4 或者 0。");
+    out("  请输入 1、2、3、4、5 或者 0。");
     await ask(NL + "  按回车回到菜单…");
   }
 }
