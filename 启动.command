@@ -3,13 +3,19 @@ cd "$(dirname "$0")"
 
 if ! command -v node >/dev/null 2>&1; then
   echo ""
-  echo "  [!] 没找到 Node.js。"
+  echo "  [!] Node.js not found."
   echo ""
-  echo "  请先到 https://nodejs.org 下载 22 或更高版本的 LTS 版装上。"
-  echo "  装完关掉这个窗口，重新双击本文件。"
+  echo "  Please install Node.js 22 or newer from https://nodejs.org"
+  echo "  Then close this window and double-click this file again."
   echo ""
-  read -r _ 
+  read -r _
   exit 1
 fi
 
-node scripts/check.mjs --launch
+node scripts/launcher.mjs
+status=$?
+if [ $status -ne 0 ]; then
+  echo ""
+  echo "  Something went wrong. Press Enter to close."
+  read -r _
+fi
