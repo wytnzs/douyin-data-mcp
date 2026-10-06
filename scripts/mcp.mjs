@@ -330,24 +330,31 @@ async function dispatch(msg) {
     const v = SUPPORTED_VERSIONS.includes(reqV) ? reqV : FALLBACK_VERSION;
     return {
       jsonrpc: "2.0", id,
-      result: { protocolVersion: v, capabilities: { tools: {} }, serverInfo: SERVER_INFO, instructions: INSTRUCTIONS },
+      result: { resultType: "complete", protocolVersion: v, capabilities: { tools: {} }, serverInfo: SERVER_INFO, instructions: INSTRUCTIONS },
     };
   }
 
   if (method === "notifications/initialized" || method === "notifications/cancelled") return null;
 
-  if (method === "ping") return { jsonrpc: "2.0", id, result: {} };
+  // 2026-07-28 起，每个 result 都要带 resultType。少了它，客户端会直接判协议不合规。
+  if (method === "ping") return { jsonrpc: "2.0", id, result: { resultType: "complete" } };
 
   if (method === "tools/list") {
     return {
       jsonrpc: "2.0", id,
-      result: { tools: TOOLS.map(({ name, description, inputSchema }) => ({ name, description, inputSchema })) },
+      result: {
+        resultType: "complete",
+        tools: TOOLS.map(({ name, description, inputSchema }) => ({ name, description, inputSchema })),
+        // 2026-07-28 要求列表类结果带缓存元数据，缺一个客户端就判不合规
+        ttlMs: 3600000,
+        cacheScope: "public",
+      },
     };
   }
 
   if (method === "tools/call") {
     const result = await handleToolCall(params);
-    return { jsonrpc: "2.0", id, result };
+    return { jsonrpc: "2.0", id, result: Object.assign({ resultType: "complete" }, result) };
   }
 
   if (isNotification) return null;

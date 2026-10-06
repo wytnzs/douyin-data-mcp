@@ -7,6 +7,11 @@ raw/
 *.sha16
 *.merge.json
 
+# 只服务本地分发的，不对外
+分发说明.md
+飞书文档/
+scripts/make-package.mjs
+
 # 浏览器登录态
 .browser-profile/
 browser-profile/
