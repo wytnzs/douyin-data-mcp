@@ -371,6 +371,20 @@ async function dispatch(msg) {
 // ---------------------------------------------------------------- stdio 主循环
 
 let buf = "";
+let pending = 0;      // 正在处理中的请求数
+let stdinClosed = false;
+let hardExit = null;  // 兜底定时器
+
+/** 只有在没有请求在跑的时候才退出。
+ *  否则客户端一关 stdin（或一次性喂完输入），正在执行的工具调用会被直接掐掉，
+ *  响应还没发出去进程就没了。 */
+function maybeExit() {
+  if (stdinClosed && pending === 0) {
+    if (hardExit) clearTimeout(hardExit);
+    process.exit(0);
+  }
+}
+
 process.stdin.setEncoding("utf8");
 process.stdin.on("data", (chunk) => {
   buf += chunk;
@@ -381,6 +395,7 @@ process.stdin.on("data", (chunk) => {
     if (!line) continue;
     let msg;
     try { msg = JSON.parse(line); } catch { say("[mcp] 收到无法解析的行，已忽略"); continue; }
+    pending++;
     Promise.resolve()
       .then(() => dispatch(msg))
       .then((res) => { if (res) send(res); })
@@ -389,10 +404,19 @@ process.stdin.on("data", (chunk) => {
         if (msg && msg.id !== undefined && msg.id !== null) {
           send({ jsonrpc: "2.0", id: msg.id, error: { code: -32603, message: e.message } });
         }
-      });
+      })
+      .finally(() => { pending--; maybeExit(); });
   }
 });
-process.stdin.on("end", () => process.exit(0));
+
+process.stdin.on("end", () => {
+  stdinClosed = true;
+  hardExit = setTimeout(() => {
+    say("[mcp] 还有 " + pending + " 个请求没跑完，但已经等太久了，强制退出");
+    process.exit(0);
+  }, 600000);
+  maybeExit();
+});
 
 say(`[mcp] douyin-data MCP server 已启动　代码 ${SCRIPTS_DIR}　浏览器端口 ${PORT}`);
 say(`[mcp] 数据 ${DATA_DIR}`);
