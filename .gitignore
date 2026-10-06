@@ -17,6 +17,7 @@ scripts/make-package.mjs
 browser-profile/
 
 # 本地杂物
+分发包/
 node_modules/
 *.zip
 *.log
