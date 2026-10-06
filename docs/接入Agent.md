@@ -58,50 +58,58 @@ node scripts/mcp-config.mjs
 
 ## 二、怎么接
 
-先跑这一行，脚本会算出你这台机器上该填的绝对路径，并打印出各客户端的配置：
+### 推荐：一行搞定，不用管路径
+
+这个 MCP server 已经发在 GitHub 上：**https://github.com/wytnzs/douyin-data-mcp**
+
+把下面这段贴进你的 MCP 配置就行：
+
+```json
+{
+  "mcpServers": {
+    "douyin": {
+      "command": "npx",
+      "args": ["-y", "github:wytnzs/douyin-data-mcp"]
+    }
+  }
+}
+```
+
+**不用写任何路径**，复制粘贴即可。
+
+**Claude Code** 用这一行：
 
 ```
-node scripts/mcp-config.mjs
-```
-
-### Claude Code
-
-```
-node scripts/mcp-config.mjs --install
-```
-
-或者手工加（把路径换成你自己的）：
-
-```
-claude mcp add douyin -s user -- node "<工具目录>/scripts/mcp.mjs"
+claude mcp add douyin -s user -- npx -y github:wytnzs/douyin-data-mcp
 ```
 
 - `-s user` = 所有项目都能用；`-s local` = 只对当前项目生效
 - 加完重启 Claude Code，用 `/mcp` 能看到 `douyin` 连着
 - 卸载：`claude mcp remove douyin -s user`
 
-### WorkBuddy
+**WorkBuddy**：插件面板 → **MCP** → 添加，把上面那段 JSON 贴进去。
 
-插件面板 → **MCP** → 添加。把 `mcp-config.mjs` 打印出来的那段 JSON 贴进去，
-如果是「命令 + 参数」两个输入框就分别填。
+**Cursor / Cline / Codex / Claude Desktop 等**：填进各自的 MCP 设置，格式一样。
 
-### 其他 MCP 客户端
+### 另一种：接本地这份
 
-用 `mcp-config.mjs` 打印的通用 JSON，填进客户端自己的 MCP 配置文件。格式都一样：
+想用本地这份（改代码时用得上），跑：
 
-```json
-{
-  "mcpServers": {
-    "douyin": {
-      "command": "<node 的绝对路径>",
-      "args": ["<工具目录>/scripts/mcp.mjs"]
-    }
-  }
-}
+```
+node scripts/mcp-config.mjs
 ```
 
-> **路径必须写绝对路径**，而且 JSON 里 Windows 的反斜杠要写成 `\\`。
-> `mcp-config.mjs` 已经替你转好了，直接复制就行。
+它会算出你这台机器上的绝对路径，打印出各客户端的配置。
+
+> 本地用法要写绝对路径，JSON 里 Windows 的反斜杠得写成 `\\`——`mcp-config.mjs` 替你转好了。
+>
+> **两种用法的唯一区别是数据放哪**：npx 装的放 `~/.douyin-data/data/`（因为 npx 的代码在缓存里，
+> 随时会被清掉，数据不能放那儿）；本地这份就放在工具目录里。想自己指定就设 `DOUYIN_DATA_DIR`。
+
+### ⚠️ 不要找别人要他的配置文件
+
+MCP 配置里是绝对路径，指向的是**他的**电脑。你填了必然连不上。
+用 npx 那种写法就没这个问题——里面一个路径都没有。
 
 ---
 
