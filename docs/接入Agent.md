@@ -58,7 +58,32 @@ node scripts/mcp-config.mjs
 
 ## 二、怎么接
 
-### 推荐：一行搞定，不用管路径
+### 最省事：让你的 Agent 自己装
+
+不用懂配置、不用找设置在哪。跑一次 `node scripts/install-mcp.mjs`（**启动菜单里就是选项 5**），
+它会把你这台机器的绝对路径算好，打印一段话——**整段复制，粘到你 AI 的对话框里发出去**：
+
+```
+请帮我装一个 MCP server，名字叫 douyin。
+
+它是本地 stdio 类型，启动方式是：
+  命令：（脚本会填上你这台机器的 node 路径）
+  参数：（脚本会填上这份工具的位置）
+
+如果你能直接改自己的 MCP 配置，就自己改完；
+如果你改不了，就告诉我该在哪个界面的哪个输入框里填什么。
+```
+
+它自己去配。**Claude Code、WorkBuddy、Cursor 都适用**——它们本来就是干这个的。
+
+> ⚠️ **关于 `npx -y github:wytnzs/douyin-data-mcp` 那种写法**
+> 看着最省事，但**靠不住**：npx 对一个 github 来源的包每次都去 codeload.github.com
+> 重新下载，本地缓存不顶用（实测：npm 离线模式下直接报 ENOTCACHED）。
+> **学员那边 GitHub 一断，MCP 就起不来。**
+> 所以本工具默认推荐指向**本机路径**——不联网、不用装任何东西。
+> `node scripts/install-mcp.mjs` 会把路径替你算好。
+
+### 一行命令（Claude Code 这类带命令行工具的）
 
 这个 MCP server 已经发在 GitHub 上：**https://github.com/wytnzs/douyin-data-mcp**
 
