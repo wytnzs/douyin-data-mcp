@@ -1,0 +1,18 @@
+# 数据 —— 永远不进仓库
+raw/
+抖音作品数据.csv
+抖音数据总览.md
+抓取状态.md
+*.sha16
+*.merge.json
+
+# 浏览器登录态
+.browser-profile/
+browser-profile/
+
+# 本地杂物
+node_modules/
+*.zip
+*.log
+.DS_Store
+Thumbs.db

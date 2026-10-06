@@ -1,0 +1,40 @@
+{
+  "name": "douyin-data-mcp",
+  "version": "1.0.0",
+  "description": "抖音创作者后台数据抓取 MCP server —— 把自己账号的作品数据抓成本地总表，供 Agent 调用",
+  "type": "module",
+  "bin": {
+    "douyin-data-mcp": "bin/douyin-data-mcp.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "files": [
+    "bin/",
+    "scripts/",
+    "collect.js",
+    "启动.bat",
+    "启动.command",
+    "docs/",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "check": "node scripts/check.mjs",
+    "daily": "node scripts/daily.mjs",
+    "mcp": "node scripts/mcp.mjs",
+    "config": "node scripts/mcp-config.mjs"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "douyin",
+    "抖音",
+    "creator-analytics",
+    "claude-code",
+    "workbuddy",
+    "codex"
+  ],
+  "license": "MIT",
+  "author": "王永涛"
+}
