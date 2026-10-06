@@ -11,10 +11,15 @@ import os from "node:os";
 import path from "node:path";
 import { spawn } from "node:child_process";
 import { probe } from "./cdp.mjs";
+import { readConfig } from "./paths.mjs";
 
 export const PORT = Number(process.env.DOUYIN_CDP_PORT || 9333);
+// 登录态所在的浏览器目录。可以用环境变量或配置文件改，默认在用户主目录下。
+// 这里只有登录态（几百 MB），不是你的数据。
 export const PROFILE_DIR =
-  process.env.DOUYIN_PROFILE_DIR || path.join(os.homedir(), ".douyin-data", "browser-profile");
+  process.env.DOUYIN_PROFILE_DIR ||
+  readConfig().browserDir ||
+  path.join(os.homedir(), ".douyin-data", "browser-profile");
 
 const CANDIDATES = {
   win32: [
