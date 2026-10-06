@@ -22,48 +22,23 @@ const COLUMNS = [
   "media_type",
 ];
 
-// ---- CSV 读写（自己写，不引依赖）---------------------------------------
-function parseCsv(text) {
-  const rows = [];
-  let row = [], cell = "", q = false;
-  for (let i = 0; i < text.length; i++) {
-    const c = text[i];
-    if (q) {
-      if (c === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; }
-      else cell += c;
-    } else if (c === '"') q = true;
-    else if (c === ",") { row.push(cell); cell = ""; }
-    else if (c === "\n") { row.push(cell); rows.push(row); row = []; cell = ""; }
-    else if (c !== "\r") cell += c;
-  }
-  if (cell !== "" || row.length) { row.push(cell); rows.push(row); }
-  return rows.filter((r) => r.length > 1 || (r[0] || "").trim() !== "");
-}
-
-const esc = (v) => {
-  const s = v === undefined || v === null ? "" : String(v);
-  return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
-};
+/** UTF-8 BOM。写给 Excel 认编码用，见 writeTable 的注释。 */
+// ---- CSV 读写统一走 csv.mjs（BOM 的读剥写在那一处）--------------------
+import { parseCsv, stringifyCsv, toObjects } from "./csv.mjs";
 
 function readTable() {
   if (!fs.existsSync(CSV)) return { header: COLUMNS.slice(), rows: [] };
-  const rows = parseCsv(fs.readFileSync(CSV, "utf8"));
-  if (!rows.length) return { header: COLUMNS.slice(), rows: [] };
-  const header = rows[0];
+  let { header, rows } = parseCsv(fs.readFileSync(CSV, "utf8"));
+  if (!header.length) return { header: COLUMNS.slice(), rows: [] };
   // 新增列只加在最后
   for (const c of COLUMNS) if (!header.includes(c)) header.push(c);
-  return { header, rows: rows.slice(1).map((r) => {
-    const o = {};
-    header.forEach((h, i) => (o[h] = r[i] ?? ""));
-    return o;
-  }) };
+  return { header, rows: toObjects(header, rows) };
 }
 
 function writeTable(header, rows) {
-  const lines = [header.map(esc).join(",")];
-  for (const o of rows) lines.push(header.map((h) => esc(o[h])).join(","));
-  fs.writeFileSync(CSV, lines.join("\n") + "\n", "utf8");
+  fs.writeFileSync(CSV, stringifyCsv(header, rows), "utf8");
 }
+
 
 // ---- 主流程 -------------------------------------------------------------
 function pickSnapshot(arg) {

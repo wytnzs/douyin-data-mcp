@@ -5,6 +5,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { DATA_DIR, RAW, CSV, OVERVIEW as OUT } from "./paths.mjs";
+import { parseCsv, toObjects } from "./csv.mjs";
 
 
 function pick(arg) {
@@ -14,21 +15,6 @@ function pick(arg) {
   return path.join(RAW, files[files.length - 1]);
 }
 
-function parseCsv(text) {
-  const rows = []; let row = [], cell = "", q = false;
-  for (let i = 0; i < text.length; i++) {
-    const c = text[i];
-    if (q) { if (c === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; } else cell += c; }
-    else if (c === '"') q = true;
-    else if (c === ",") { row.push(cell); cell = ""; }
-    else if (c === "\n") { row.push(cell); rows.push(row); row = []; cell = ""; }
-    else if (c !== "\r") cell += c;
-  }
-  if (cell !== "" || row.length) { row.push(cell); rows.push(row); }
-  if (!rows.length) return { header: [], rows: [] };
-  const header = rows[0];
-  return { header, rows: rows.slice(1).filter((r) => r.join("").trim()).map((r) => { const o = {}; header.forEach((h, i) => (o[h] = r[i] ?? "")); return o; }) };
-}
 
 const snapPath = pick(process.argv[2]);
 const snap = JSON.parse(fs.readFileSync(snapPath, "utf8"));
@@ -36,7 +22,8 @@ const meta = snap._meta;
 const date = meta.capture_date;
 const acct = (meta.account || {}).nickname || "（账号昵称未取到）";
 
-const { rows } = parseCsv(fs.readFileSync(CSV, "utf8"));
+const parsed = parseCsv(fs.readFileSync(CSV, "utf8"));
+const rows = toObjects(parsed.header, parsed.rows);
 const dates = [...new Set(rows.map((r) => r.capture_date))].sort();
 const prevDate = dates.filter((d) => d < date).pop() || null;
 

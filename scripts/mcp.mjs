@@ -14,6 +14,7 @@ import { spawn } from "node:child_process";
 import { DATA_DIR, RAW, CSV, LOG, SCRIPTS_DIR } from "./paths.mjs";
 import { browserReady, PORT, PROFILE_DIR } from "./browser.mjs";
 import { listPages, evaluate } from "./cdp.mjs";
+import { parseCsv, toObjects } from "./csv.mjs";
 
 const SITE = "creator.douyin.com";
 const MANAGE_URL = `https://${SITE}/creator-micro/content/manage`;
@@ -87,25 +88,8 @@ async function envState() {
 
 function readCsv() {
   if (!fs.existsSync(CSV)) return { header: [], rows: [] };
-  const text = fs.readFileSync(CSV, "utf8");
-  const rows = []; let row = [], cell = "", q = false;
-  for (let i = 0; i < text.length; i++) {
-    const c = text[i];
-    if (q) { if (c === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; } else cell += c; }
-    else if (c === '"') q = true;
-    else if (c === ",") { row.push(cell); cell = ""; }
-    else if (c === "\n") { row.push(cell); rows.push(row); row = []; cell = ""; }
-    else if (c !== "\r") cell += c;
-  }
-  if (cell !== "" || row.length) { row.push(cell); rows.push(row); }
-  if (!rows.length) return { header: [], rows: [] };
-  const header = rows[0];
-  return {
-    header,
-    rows: rows.slice(1).filter((r) => r.join("").trim()).map((r) => {
-      const o = {}; header.forEach((h, i) => (o[h] = r[i] ?? "")); return o;
-    }),
-  };
+  const { header, rows } = parseCsv(fs.readFileSync(CSV, "utf8"));
+  return { header, rows: toObjects(header, rows) };
 }
 
 function dataState() {
